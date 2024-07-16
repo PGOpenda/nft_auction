@@ -1,7 +1,7 @@
 module nft_auction::nft {
     
     use std::string::String;
-    use sui::object::{Self, UID, new};
+    use sui::object::{Self, UID, new, delete};
     use sui::tx_context::{Self, TxContext, sender};
     use sui::transfer;
     use sui::event;
@@ -66,8 +66,8 @@ module nft_auction::nft {
     }
 
     // Function to transfer an NFT to another address
-    public entry fun transfer_nft(nft: NFT, recipient: address) {
-        let sender = tx_context::sender(ctx);
+    public entry fun transfer_nft(nft: NFT, recipient: address, ctx: &mut TxContext) {
+        let sender = sender(ctx);
 
         // Transfer the NFT to the recipient
         transfer::public_transfer(nft, recipient);
@@ -82,7 +82,7 @@ module nft_auction::nft {
 
     // Function to burn an NFT
     public entry fun burn_nft(nft: NFT, ctx: &mut TxContext) {
-        let owner = tx_context::sender(ctx);
+        let owner = sender(ctx);
 
         // Emit NFTBurned event before destruction
         event::emit(NFTBurned {
@@ -91,7 +91,7 @@ module nft_auction::nft {
         });
 
         // Destroy the NFT
-        object::delete(&nft.id, ctx);
+        delete(&nft.id, ctx);
     }
 
     // Getter functions for testing
@@ -100,4 +100,10 @@ module nft_auction::nft {
     }
 
     public fun description(nft: &NFT): &String {
-        &
+        &nft.description
+    }
+
+    public fun image_url(nft: &NFT): &String {
+        &nft.image_url
+    }
+}
